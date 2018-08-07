@@ -24,5 +24,5 @@ while True:
     target = input ('введите ip: ')
     ports = (22, 23, 8291, 64231)
     for x in ports:
-        if portscan (x):
+        if portscan (target, x):
             print ('port', x, 'is open!')
