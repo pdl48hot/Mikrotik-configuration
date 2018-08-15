@@ -1,7 +1,13 @@
 import paramiko
 import random
 from pyparsing import *
+from yaml import Loader, load
+import os
 from pprint import *
+
+my_dir = os.getcwd()
+
+
 
 
 class ssh_local_device:
@@ -109,8 +115,6 @@ def error_usl(comand_input, type_input):
             print ("error <type:firewall_filter_delete>:", comand_input)
 
 
-
-
 def random_gen():
     str1 = "123456789"
     str2 = "qwertyuiopasdfghjklzxcvbnm"
@@ -158,7 +162,7 @@ def scheduler():
 
 
 
-def firewall():
+def firewall_FIRST():
 
     # -------------------------FIREWALL-FILTER-DELETE------------------------------------------
 
@@ -166,7 +170,7 @@ def firewall():
     comand = ssh.exec_cmd ("/ip firewall filter {:foreach c in=[find] do={:do {remove $c;} on-error={}}} ")
     error_usl (comand, type_def_filter_delete)
 
-    # -------------------------FIREWALL-FILTER-REMOVE-------------------------------------------------
+    # -------------------------FIREWALL-FILTER-REMOTE-------------------------------------------------
     type_def_filter = "firewall_filter"
     comand = ssh.exec_cmd ('/ip firewall filter add action=accept chain=input '
                            'comment="remote access for rinet" in-interface=ether1 src-address-list=remote_access')
@@ -294,6 +298,44 @@ def loging():
     comand = ssh.exec_cmd ("/system logging set numbers=3 action=disk disabled=no topics=critical ")
     error_usl (comand, type_def)
 
+def test():
+
+    # -------------------------FIREWALL-FILTER-DELETE-------------------------------------------------
+    type_def_filter_delete = "firewall_filter_delete"
+    comand = ssh.exec_cmd ("/ip firewall filter {:foreach c in=[find] do={:do {remove $c;} on-error={}}} ")
+    error_usl (comand, type_def_filter_delete)
+
+    # -------------------------FIREWALL-FILTER-ADD-RULES----------------------------------------------
+    yml_firewall_file = open (my_dir + '\\firewall\\firewall.txt', 'r')
+    firewall_file = load (yml_firewall_file, Loader=Loader)
+    for firewall_filter in firewall_file:
+        type_def_filter = "firewall_filter"
+        newrules = ["/ip firewall filter add"]
+        for (param, value) in firewall_filter.items ():
+            newrules.append (' ' + str (param) + '=' + str (value))
+        command = ''.join(newrules)
+        add_firewall_rules = ssh.exec_cmd (command)
+        error_usl (add_firewall_rules, type_def_filter)
+
+    # -------------------------FIREWALL-MANGLE-DELETE-------------------------------------------------
+    type_def_mangle = "firewall_mangle_delete"
+    comand = ssh.exec_cmd ('/ip firewall mangle remove numbers=[find comment="auto mangle rule"]')
+    error_usl (comand, type_def_mangle)
+
+    # -------------------------FIREWALL-MANGLE-ADD-RULES----------------------------------------------
+    yml_mangle_file = open (my_dir + '\\firewall\\mangle.txt', 'r')
+    mangle_file = load (yml_mangle_file, Loader=Loader)
+    for mangle_filter in mangle_file:
+        type_def_filter = "firewall_mangle"
+        newrules = ["/ip firewall mangle add"]
+        for (param, value) in mangle_filter.items ():
+            newrules.append (' ' + str (param) + '=' + str (value))
+
+        command = ''.join(newrules)
+        print (command)
+        add_mangle_rules = ssh.exec_cmd (command)
+        print(add_mangle_rules)
+        error_usl (add_mangle_rules, type_def_filter)
 
 # ============================MAIN-PROGRAMM=================================
 
@@ -331,8 +373,8 @@ if __name__ == '__main__':
 
             first_start = input('Первый прогон? (yes/no):')
             if first_start != "yes":
-
-                firewall ()
+                test()
+                #firewall ()
                 ntp ()
                 identity (login_name)
                 loging ()
@@ -341,4 +383,5 @@ if __name__ == '__main__':
             else:
                 scheduler()
                 upgrade ()
+
                 baba = 1
