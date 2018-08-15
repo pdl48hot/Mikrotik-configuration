@@ -298,7 +298,7 @@ def loging():
     comand = ssh.exec_cmd ("/system logging set numbers=3 action=disk disabled=no topics=critical ")
     error_usl (comand, type_def)
 
-def test():
+def firewall():
 
     # -------------------------FIREWALL-FILTER-DELETE-------------------------------------------------
     type_def_filter_delete = "firewall_filter_delete"
@@ -308,11 +308,13 @@ def test():
     # -------------------------FIREWALL-FILTER-ADD-RULES----------------------------------------------
     yml_firewall_file = open (my_dir + '\\firewall\\firewall.txt', 'r')
     firewall_file = load (yml_firewall_file, Loader=Loader)
+
     for firewall_filter in firewall_file:
         type_def_filter = "firewall_filter"
         newrules = ["/ip firewall filter add"]
         for (param, value) in firewall_filter.items ():
             newrules.append (' ' + str (param) + '=' + str (value))
+
         command = ''.join(newrules)
         add_firewall_rules = ssh.exec_cmd (command)
         error_usl (add_firewall_rules, type_def_filter)
@@ -325,6 +327,7 @@ def test():
     # -------------------------FIREWALL-MANGLE-ADD-RULES----------------------------------------------
     yml_mangle_file = open (my_dir + '\\firewall\\mangle.txt', 'r')
     mangle_file = load (yml_mangle_file, Loader=Loader)
+
     for mangle_filter in mangle_file:
         type_def_filter = "firewall_mangle"
         newrules = ["/ip firewall mangle add"]
@@ -332,10 +335,29 @@ def test():
             newrules.append (' ' + str (param) + '=' + str (value))
 
         command = ''.join(newrules)
-        print (command)
         add_mangle_rules = ssh.exec_cmd (command)
-        print(add_mangle_rules)
         error_usl (add_mangle_rules, type_def_filter)
+
+    # -------------------------FIREWALL-ADDRESS-LIST-DELETE-------------------------------------------------
+    type_def_address_list_delete = "firewall_address_list_delete"
+    comand = ssh.exec_cmd ("/ip firewall address-list remove numbers=[find list=remote_access]")
+    error_usl (comand, type_def_address_list_delete)
+
+    # -------------------------FIREWALL-ADDRESS-LIST-ADD----------------------------------------------
+    yml_address_list_file = open (my_dir + '\\firewall\\address-list.txt', 'r')
+    address_list_file = load (yml_address_list_file, Loader=Loader)
+
+    for address_list_filter in address_list_file:
+        type_def_filter = "firewall_address_list"
+        newrules = ["/ip firewall address-list add"]
+        for (param, value) in address_list_filter.items ():
+            newrules.append (' ' + str (param) + '=' + str (value))
+
+        command = ''.join(newrules)
+        add_address_list_rules = ssh.exec_cmd (command)
+        error_usl (add_address_list_rules, type_def_filter)
+
+
 
 # ============================MAIN-PROGRAMM=================================
 
