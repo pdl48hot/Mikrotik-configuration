@@ -3,11 +3,10 @@ import random
 from pyparsing import *
 from yaml import Loader, load
 import os
-from pprint import *
 
-my_dir = os.getcwd()
+# from pprint import *
 
-
+my_dir = os.getcwd ()
 
 
 class ssh_local_device:
@@ -17,7 +16,7 @@ class ssh_local_device:
         self.kwargs = kwargs
 
     def __enter__(self):
-        """Ккод для подключения к удаленному хосту с импрортируемым модулем paramiko"""
+        """код для подключения к удаленному хосту с импрортируемым модулем paramiko"""
         kw = self.kwargs
         self.client.connect (hostname=kw.get ('hostname'), username=kw.get ('username'),
                              password=kw.get ('password'), port=int (kw.get ('port', 22)))
@@ -35,42 +34,125 @@ class ssh_local_device:
         return data.decode ()
 
 
-class ssh_server_device:
-    def __init__(self, **kwargs):
-        self.client = paramiko.SSHClient ()
-        self.client.set_missing_host_key_policy (paramiko.AutoAddPolicy ())
-        self.kwargs = kwargs
+# готово
+def treatment(dir_cfg, dir_command, type_def):
+    global conformity_check
+    yml_file = open (dir_cfg, 'r')
+    treatment_file = load (yml_file, Loader=Loader)
 
-    def __enter__(self):
-        """Ккод для подключения к удаленному хосту с импрортируемым модулем paramiko"""
-        kw = self.kwargs
-        self.client.connect (hostname=kw.get ('hostname'), username=kw.get ('username'),
-                             password=kw.get ('password'), port=int (kw.get ('port', 22)))
-        return self
+    for treatment_filter in treatment_file:
+        new_rules_def = [dir_command]
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.client.close ()
+        for (param, value) in treatment_filter.items ():
+            new_rules_def.append (' ' + str (param) + '=' + str (value))
 
-    def exec_cmd(self, cmd):
-        """ Необходимо выполнить команду с помощью скрипта (к прим. ls -al)"""
-        stdin, stdout, stderr = self.client.exec_command (cmd)
-        data = stdout.read ()
-        # if stderr:
-        # raise stderr
-        return data.decode ()
+            conformity_check = ' module=%s' % type_def
+
+        if new_rules_def[1] == conformity_check:
+            new_rules_def.remove (new_rules_def[1])
+            command = ''.join (new_rules_def)
+            add_firewall_rules = ssh.exec_cmd (command)
+            error_usl (add_firewall_rules, type_def)
+            # print(command)
+        else:
+            pass
+
+
+# готово
+def treatment_for_qos(dir_cfg, dir_command, type_def, queue_tree_rate_def):
+    global conformity_check
+    yml_file = open (dir_cfg, 'r')
+    treatment_file = load (yml_file, Loader=Loader)
+
+    for treatment_filter in treatment_file:
+        new_rules_def = [dir_command]
+
+        for (param, value) in treatment_filter.items ():
+            if value == 'tx_rate':
+
+                new_rules_def.append (' ' + str (param) + '=' + str (queue_tree_rate_def))
+
+                conformity_check = ' module=%s' % type_def
+            else:
+                new_rules_def.append (' ' + str (param) + '=' + str (value))
+
+                conformity_check = ' module=%s' % type_def
+
+        if new_rules_def[1] == conformity_check:
+            new_rules_def.remove (new_rules_def[1])
+            command = ''.join (new_rules_def)
+            add_firewall_rules = ssh.exec_cmd (command)
+            error_usl (add_firewall_rules, type_def)
+
+        else:
+            pass
+
+
+def treatment_for_dhcp(dir_cfg, dir_command, type_def, my_network_def, ip_dhcp_server_def):
+    global conformity_check
+    yml_file = open (dir_cfg, 'r')
+    treatment_file = load (yml_file, Loader=Loader)
+
+    for treatment_filter in treatment_file:
+        new_rules_def = [dir_command]
+
+        for (param, value) in treatment_filter.items ():
+            if value == 'network':
+
+                new_rules_def.append (' ' + str (param) + '=' + str (my_network_def))
+
+                conformity_check = ' module=%s' % type_def
+
+            elif value == 'ip_dhcp_server':
+
+                new_rules_def.append (' ' + str (param) + '=' + str (ip_dhcp_server_def))
+
+                conformity_check = ' module=%s' % type_def
+
+            else:
+                new_rules_def.append (' ' + str (param) + '=' + str (value))
+
+                conformity_check = ' module=%s' % type_def
+
+        if new_rules_def[1] == conformity_check:
+            print ('conformity_check: ', conformity_check)
+            new_rules_def.remove (new_rules_def[1])
+            print (new_rules_def)
+            command = ''.join (new_rules_def)
+            add_firewall_rules = ssh.exec_cmd (command)
+            error_usl (add_firewall_rules, type_def)
+
+        else:
+            pass
+
+
+# готово
+def treatment_firewall_rules(dir_cfg, dir_command, type_def):
+    yml_file = open (dir_cfg, 'r')
+    treatment_file = load (yml_file, Loader=Loader)
+
+    for treatment_filter in treatment_file:
+        new_rules_def = [dir_command]
+
+        for (param, value) in treatment_filter.items ():
+            new_rules_def.append (' ' + str (param) + '=' + str (value))
+
+        command = ''.join (new_rules_def)
+        add_firewall_rules = ssh.exec_cmd (command)
+        error_usl (add_firewall_rules, type_def)
 
 
 # ============================FOR_CLASS_MIKROTIK_CONNECT=================================
 
-def server(login_name):
+def server(login_name_def):
     type_def = "server"
-    random_pass = random_gen ()
+    # random_pass = random_gen ()
     comand = ssh.exec_cmd (
         "/ppp secret add name=%s password=%s profile=profile-l2tp remote-address=10.10.0.68 "
-        "service=l2tp" % (login_name, random_pass))
+        "service=l2tp" % login_name_def)
 
     error_usl (comand, type_def)
-    return random_pass
+    # return random_pass
 
 
 def client(login_name_device, random_pass_device):
@@ -81,38 +163,9 @@ def client(login_name_device, random_pass_device):
     error_usl (comand, type_def)
 
 
-def error_usl(comand_input, type_input):
-    if comand_input != "":
-
-        if type_input == "loging":
-            print ("error <type:loging>:", comand_input)
-
-        elif type_input == "users":
-            print ("error <type:users>:", comand_input)
-
-        elif type_input == "server":
-            print ("error <type:server>:", comand_input)
-
-        elif type_input == "l2tp-zabbix":
-            print ("error <type:l2tp-zabbix>:", comand_input)
-
-        elif type_input == "clock":
-            print ("error <type:clock>:", comand_input)
-
-        elif type_input == "firewall_filter":
-            print ("error <type:firewall_filter>:", comand_input)
-
-        elif type_input == "firewall_address_list":
-            print ("error <type:firewall_address_list>:", comand_input)
-
-        elif type_input == "firewall_address_list_delete":
-            print ("error <type:firewall_address_list_delete>:", comand_input)
-
-        elif type_input == "firewall_filter_delete":
-            print ("error <type:firewall_filter_delete>:", comand_input)
-
-        elif type_input == "scheduler":
-            print ("error <type:firewall_filter_delete>:", comand_input)
+def error_usl(command_input, type_input):
+    if command_input != "":
+        print ("error <type:%s>:" % type_input, command_input)
 
 
 def random_gen():
@@ -122,11 +175,12 @@ def random_gen():
     str4 = str1 + str2 + str3
     ls = list (str4)
     random.shuffle (ls)
-    random_def_pass = ''.join ([random.choice (ls) for x in range (15)])
-    return random_def_pass
+    # random_def_pass = ''.join ([random.choice (ls) for x in range (15)])
+    # return random_def_pass
 
 
 def parser_model_serial(out_comand):
+    global model_device, serial_number
     out_comand_treatment = out_comand.splitlines ()
     out_comand_treatment.pop ()
     out_comand_treatment_count = int (len (out_comand_treatment))
@@ -153,80 +207,11 @@ def parser_model_serial(out_comand):
     return model_device, serial_number
 
 
-
 # ============================FOR_CLASS_MIKROTIK_CONFIG=================================
 def scheduler():
     type_def = "scheduler"
     comand = ssh.exec_cmd ('system scheduler add name=reset start-time=startup on-event="system reset-configuration"')
     error_usl (comand, type_def)
-
-
-
-def firewall_FIRST():
-
-    # -------------------------FIREWALL-FILTER-DELETE------------------------------------------
-
-    type_def_filter_delete = "firewall_filter_delete"
-    comand = ssh.exec_cmd ("/ip firewall filter {:foreach c in=[find] do={:do {remove $c;} on-error={}}} ")
-    error_usl (comand, type_def_filter_delete)
-
-    # -------------------------FIREWALL-FILTER-REMOTE-------------------------------------------------
-    type_def_filter = "firewall_filter"
-    comand = ssh.exec_cmd ('/ip firewall filter add action=accept chain=input '
-                           'comment="remote access for rinet" in-interface=ether1 src-address-list=remote_access')
-    error_usl (comand, type_def_filter)
-
-    # -------------------------FIREWALL-FILTER--------------------------------------------------------
-    comand = ssh.exec_cmd ('/ip firewall filter add action=accept chain=input connection-state=established,related')
-    error_usl (comand, type_def_filter)
-    comand = ssh.exec_cmd ('/ip firewall filter add action=accept chain=input protocol=icmp')
-    error_usl (comand, type_def_filter)
-    comand = ssh.exec_cmd ('/ip firewall filter add action=drop chain=input in-interface=ether1')
-    error_usl (comand, type_def_filter)
-    comand = ssh.exec_cmd ('/ip firewall filter add action=accept chain=forward connection-state=established,related')
-    error_usl (comand, type_def_filter)
-    comand = ssh.exec_cmd ('/ip firewall filter add action=drop chain=forward connection-state=invalid')
-    error_usl (comand, type_def_filter)
-    comand = ssh.exec_cmd ('/ip firewall filter add action=drop chain=forward '
-                           'connection-nat-state=!dstnat connection-state=new in-interface=ether1')
-    error_usl (comand, type_def_filter)
-
-    # -------------------------FIREWALL-FILTER-ADDRESS-LIST-REMOWE------------------------------------------------
-    type_def_address_list = "firewall_address_list"
-    type_def_address_list_delete = "firewall_address_list_delete"
-
-    comand = ssh.exec_cmd ("/ip firewall address-list remove numbers=[find list=remote_access]")
-    error_usl (comand, type_def_address_list_delete)
-
-    # -------------------------FIREWALL-FILTER-ADDRESS-LIST-------------------------------------------------
-    comand = ssh.exec_cmd ("/ip firewall address-list add address=86.62.127.224/28 list=remote_access")
-    error_usl (comand, type_def_address_list)
-    comand = ssh.exec_cmd ("/ip firewall address-list add address=86.62.82.242 list=remote_access")
-    error_usl (comand, type_def_address_list)
-    comand = ssh.exec_cmd ("/ip firewall address-list add address=172.16.255.254 list=remote_access")
-    error_usl (comand, type_def_address_list)
-
-    # -------------------------FIREWALL-SERVICE-PORT-------------------------------------------------
-
-    type_def_service_port = "firewall_service_port"
-
-    comand = ssh.exec_cmd ('/ip firewall service-port set sip sip-direct-media=no')
-    error_usl (comand, type_def_service_port)
-
-    # -------------------------FIREWALL-MANGLE-------------------------------------------------
-    type_def_mangle = "firewall_service_port"
-    comand = ssh.exec_cmd ('/ip firewall mangle remove numbers=[find comment="auto mangle rule"]')
-    error_usl (comand, type_def_mangle)
-
-    comand = ssh.exec_cmd ('/ip firewall mangle add dst-address=!192.168.88.0/24 action=mark-connection chain=forward '
-                           'connection-mark=no-mark new-connection-mark=new_mark_conn passthrough=yes comment="auto '
-                           'mangle rule"')
-    error_usl (comand, type_def_mangle)
-
-    comand = ssh.exec_cmd ('/ip firewall mangle add action=mark-packet chain=forward '
-                           'connection-mark=new_mark_conn new-packet-mark=mark_packet->new_con passthrough=yes '
-                           'comment="auto mangle rule"')
-    error_usl (comand, type_def_mangle)
 
 
 def upgrade():
@@ -253,71 +238,78 @@ def upgrade():
     error_usl (comand, type_def)
 
 
-def users():
-    type_def = "users"
-    comand = ssh.exec_cmd ("/user add "
-                           "name=zabbix password=Putilin48 group=full address=10.10.0.1")
-    error_usl (comand, type_def)
-    comand = ssh.exec_cmd ("user set admin address=192.168.88.0/24")
-    error_usl (comand, type_def)
-    comand = ssh.exec_cmd ("/user add "
-                           "name=rinet password=rinetsupport group=full")
-    error_usl (comand, type_def)
+# готово
+def users(my_network_def):
+    dir_mikrotik_cfg = my_dir + '\\mikrotik.cfg'
+    dir_command = '/user add'
+    type_error_ntp = "users"
+    command = ssh.exec_cmd ('/user set admin address="%s" comment="" ' % my_network_def)
+    error_usl (command, type_error_ntp)
+    treatment (dir_mikrotik_cfg, dir_command, type_error_ntp)
 
 
+# готово!
 def clock():
-    type_def = "clock"
-    command = ssh.exec_cmd ("/system clock set time-zone-autodetect= no time-zone-name= Europe/Moscow")
-    error_usl (command, type_def)
+    dir_mikrotik_cfg = my_dir + '\\mikrotik.cfg'
+    dir_command = '/system clock set'
+    type_error_ntp = "clock"
+    treatment (dir_mikrotik_cfg, dir_command, type_error_ntp)
 
 
-def identity(login_name_device):
+def queue(queue_tree_rate_def):
+    pcq_upload_def = 'pcq_upload'
+    pcq_download_def = 'pcq_download'
+    dir_mikrotik_cfg = my_dir + '\\mikrotik.cfg'
+    dir_command = '/queue tree add'
+    type_error_ntp = "queue"
+
+    # -------------------------QUEUE-TREE-DELETE-------------------------------------------------
+    command = ssh.exec_cmd ('/queue tree remove numbers="%s"' % pcq_upload_def)
+    error_usl (command, type_error_ntp)
+
+    command = ssh.exec_cmd ('/queue tree remove numbers="%s"' % pcq_download_def)
+    error_usl (command, type_error_ntp)
+
+    # -------------------------QUEUE-TREE-ADD-------------------------------------------------
+    treatment_for_qos (dir_mikrotik_cfg, dir_command, type_error_ntp, queue_tree_rate_def)
+
+
+# готово!
+def identity():
     type_def = "identity"
-    command = ssh.exec_cmd ("/system identity set name= %s" % login_name_device)
+    login_name_device = input ("Введите логин объекта:")
+    command = ssh.exec_cmd ('/system identity set name="%s"' % login_name_device)
     error_usl (command, type_def)
 
 
+# готово
+def logging():
+    dir_mikrotik_cfg = my_dir + '\\mikrotik.cfg'
+    dir_command = '/system logging set'
+    type_error_ntp = 'logging'
+    treatment (dir_mikrotik_cfg, dir_command, type_error_ntp)
+
+
+# готово
 def ntp():
+    dir_mikrotik_cfg = my_dir + '\\mikrotik.cfg'
+    dir_ntp_command = '/system ntp client set'
+    type_error_ntp = 'ntp'
+    treatment (dir_mikrotik_cfg, dir_ntp_command, type_error_ntp)
 
-    type_def = "ntp"
-    command = ssh.exec_cmd ("/system ntp client set enabled=yes primary-ntp=195.54.192.55")
-    error_usl (command, type_def)
 
-
-def loging():
-    type_def = "loging"
-    comand = ssh.exec_cmd ("/system logging set numbers=0 action=disk disabled=no topics=info,!ppp,!wireless ")
-    error_usl (comand, type_def)
-
-    comand = ssh.exec_cmd ("/system logging set numbers=1 action=disk disabled=no topics=error ")
-    error_usl (comand, type_def)
-
-    comand = ssh.exec_cmd ("/system logging set numbers=2 action=disk disabled=no topics=warning ")
-    error_usl (comand, type_def)
-
-    comand = ssh.exec_cmd ("/system logging set numbers=3 action=disk disabled=no topics=critical ")
-    error_usl (comand, type_def)
-
+# готово
 def firewall():
-
     # -------------------------FIREWALL-FILTER-DELETE-------------------------------------------------
     type_def_filter_delete = "firewall_filter_delete"
     comand = ssh.exec_cmd ("/ip firewall filter {:foreach c in=[find] do={:do {remove $c;} on-error={}}} ")
     error_usl (comand, type_def_filter_delete)
 
     # -------------------------FIREWALL-FILTER-ADD-RULES----------------------------------------------
-    yml_firewall_file = open (my_dir + '\\firewall\\firewall.txt', 'r')
-    firewall_file = load (yml_firewall_file, Loader=Loader)
-
-    for firewall_filter in firewall_file:
-        type_def_filter = "firewall_filter"
-        newrules = ["/ip firewall filter add"]
-        for (param, value) in firewall_filter.items ():
-            newrules.append (' ' + str (param) + '=' + str (value))
-
-        command = ''.join(newrules)
-        add_firewall_rules = ssh.exec_cmd (command)
-        error_usl (add_firewall_rules, type_def_filter)
+    dir_mikrotik_cfg = my_dir + '\\firewall\\firewall.txt'
+    dir_ntp_command = '/ip firewall filter add'
+    type_error_ntp = 'firewall filter'
+    treatment_firewall_rules (dir_mikrotik_cfg, dir_ntp_command, type_error_ntp)
 
     # -------------------------FIREWALL-MANGLE-DELETE-------------------------------------------------
     type_def_mangle = "firewall_mangle_delete"
@@ -325,18 +317,10 @@ def firewall():
     error_usl (comand, type_def_mangle)
 
     # -------------------------FIREWALL-MANGLE-ADD-RULES----------------------------------------------
-    yml_mangle_file = open (my_dir + '\\firewall\\mangle.txt', 'r')
-    mangle_file = load (yml_mangle_file, Loader=Loader)
-
-    for mangle_filter in mangle_file:
-        type_def_filter = "firewall_mangle"
-        newrules = ["/ip firewall mangle add"]
-        for (param, value) in mangle_filter.items ():
-            newrules.append (' ' + str (param) + '=' + str (value))
-
-        command = ''.join(newrules)
-        add_mangle_rules = ssh.exec_cmd (command)
-        error_usl (add_mangle_rules, type_def_filter)
+    dir_mikrotik_cfg = my_dir + '\\firewall\\mangle.txt'
+    dir_ntp_command = '/ip firewall mangle add'
+    type_error_ntp = 'firewall-mangle'
+    treatment_firewall_rules (dir_mikrotik_cfg, dir_ntp_command, type_error_ntp)
 
     # -------------------------FIREWALL-ADDRESS-LIST-DELETE-------------------------------------------------
     type_def_address_list_delete = "firewall_address_list_delete"
@@ -344,22 +328,32 @@ def firewall():
     error_usl (comand, type_def_address_list_delete)
 
     # -------------------------FIREWALL-ADDRESS-LIST-ADD----------------------------------------------
-    yml_address_list_file = open (my_dir + '\\firewall\\address-list.txt', 'r')
-    address_list_file = load (yml_address_list_file, Loader=Loader)
+    dir_mikrotik_cfg = my_dir + '\\firewall\\address-list.txt'
+    dir_ntp_command = '/ip firewall address-list add'
+    type_error_ntp = 'firewall-address-list'
+    treatment_firewall_rules (dir_mikrotik_cfg, dir_ntp_command, type_error_ntp)
 
-    for address_list_filter in address_list_file:
-        type_def_filter = "firewall_address_list"
-        newrules = ["/ip firewall address-list add"]
-        for (param, value) in address_list_filter.items ():
-            newrules.append (' ' + str (param) + '=' + str (value))
+    # -------------------------FIREWALL-SERVICE-PORT-SIP-SET----------------------------------------------
+    dir_mikrotik_cfg = my_dir + '\\mikrotik.cfg'
+    dir_ntp_command = '/ip firewall service-port set sip'
+    type_error_ntp = 'service-port'
+    treatment (dir_mikrotik_cfg, dir_ntp_command, type_error_ntp)
 
-        command = ''.join(newrules)
-        add_address_list_rules = ssh.exec_cmd (command)
-        error_usl (add_address_list_rules, type_def_filter)
 
+# не готово
+def dhcp_server(my_network_def, ip_dhcp_server_def):
+    dir_mikrotik_cfg = my_dir + '\\mikrotik.cfg'
+    dir_command = '/ip dhcp-server add'
+    type_error = 'dhcp-server'
+    treatment_for_dhcp (dir_mikrotik_cfg, dir_command, type_error, my_network_def, ip_dhcp_server_def)
+
+
+# def test():
+#     command = ssh.exec_cmd ('/interface ethernet print')
 
 
 # ============================MAIN-PROGRAMM=================================
+
 
 if __name__ == '__main__':
 
@@ -375,11 +369,8 @@ if __name__ == '__main__':
     login_server_device = "zabbix_api"
     pass_server_device = "Pdl48zx0ma3st15!"
 
-    login_name = input ("Введите логин объекта:")
-
-    #with ssh_server_device (hostname=ip_device_server, username=login_server_device,
-     #                       password=pass_server_device, port=port_access_server) as ssh:
-
+    # with ssh_local_device (hostname=ip_device_server, username=login_server_device,
+    #                       password=pass_server_device, port=port_access_server) as ssh:
 
     with ssh_local_device (hostname=ip_device_clients, username=login_local_device,
                            password=pass_local_device, port=port_access_clients) as ssh:
@@ -391,19 +382,29 @@ if __name__ == '__main__':
             out = ssh.exec_cmd ("/system routerboard print")
             model, serial = parser_model_serial (out)
 
+            first_start = input ('Первый прогон? (yes/no):')
 
-
-            first_start = input('Первый прогон? (yes/no):')
             if first_start != "yes":
-                test()
-                #firewall ()
+                my_network = input ("Введите вашу подсеть: ")
+                # ip_dhcp_server = input ("Введите ip mikotik: ")
+                queue_tree_rate = input ("Введите скорость интернета: (*10M): ")
+
+                # Модули для всех
+                identity ()
+                logging ()
                 ntp ()
-                identity (login_name)
-                loging ()
-                users()
+                clock ()
+                users (my_network)
+                # Важные модули
+                firewall ()
+                queue (queue_tree_rate)
+                # test()
+                # dhcp_server (my_network, ip_dhcp_server)
+
                 baba = 1
+
             else:
-                scheduler()
+                scheduler ()
                 upgrade ()
 
                 baba = 1
