@@ -45,6 +45,7 @@ def treatment(dir_cfg, dir_command, type_def):
 
         for (param, value) in treatment_filter.items ():
             new_rules_def.append (' ' + str (param) + '=' + str (value))
+            print(new_rules_def)
 
             conformity_check = ' module=%s' % type_def
 
@@ -68,15 +69,13 @@ def treatment_for_qos(dir_cfg, dir_command, type_def, queue_tree_rate_def):
         new_rules_def = [dir_command]
 
         for (param, value) in treatment_filter.items ():
+            conformity_check = ' module=%s' % type_def
+
             if value == 'tx_rate':
 
                 new_rules_def.append (' ' + str (param) + '=' + str (queue_tree_rate_def))
-
-                conformity_check = ' module=%s' % type_def
             else:
                 new_rules_def.append (' ' + str (param) + '=' + str (value))
-
-                conformity_check = ' module=%s' % type_def
 
         if new_rules_def[1] == conformity_check:
             new_rules_def.remove (new_rules_def[1])
@@ -358,7 +357,7 @@ def dhcp_server(my_network_def, ip_dhcp_server_def):
 if __name__ == '__main__':
 
     # clients
-    ip_device_clients = "192.168.1.1"
+    ip_device_clients = "192.168.88.1"
     port_access_clients = 22
     login_local_device = "admin"
     pass_local_device = ""
