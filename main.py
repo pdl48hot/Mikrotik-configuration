@@ -358,7 +358,7 @@ def dhcp_server(my_network_def, ip_dhcp_server_def):
 if __name__ == '__main__':
 
     # clients
-    ip_device_clients = "192.168.88.1"
+    ip_device_clients = "192.168.1.1"
     port_access_clients = 22
     login_local_device = "admin"
     pass_local_device = ""
