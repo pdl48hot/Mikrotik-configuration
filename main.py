@@ -1,4 +1,4 @@
-import paramiko
+
 import random
 from pyparsing import *
 from yaml import Loader, load
@@ -7,31 +7,6 @@ import os
 # from pprint import *
 
 my_dir = os.getcwd ()
-
-
-class ssh_local_device:
-    def __init__(self, **kwargs):
-        self.client = paramiko.SSHClient ()
-        self.client.set_missing_host_key_policy (paramiko.AutoAddPolicy ())
-        self.kwargs = kwargs
-
-    def __enter__(self):
-        """код для подключения к удаленному хосту с импрортируемым модулем paramiko"""
-        kw = self.kwargs
-        self.client.connect (hostname=kw.get ('hostname'), username=kw.get ('username'),
-                             password=kw.get ('password'), port=int (kw.get ('port', 22)))
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.client.close ()
-
-    def exec_cmd(self, cmd):
-        """ Необходимо выполнить команду с помощью скрипта (к прим. ls -al)"""
-        stdin, stdout, stderr = self.client.exec_command (cmd)
-        data = stdout.read ()
-        # if stderr:
-        # raise stderr
-        return data.decode ()
 
 
 # готово
@@ -45,7 +20,7 @@ def treatment(dir_cfg, dir_command, type_def):
 
         for (param, value) in treatment_filter.items ():
             new_rules_def.append (' ' + str (param) + '=' + str (value))
-            print(new_rules_def)
+            # print(new_rules_def)
 
             conformity_check = ' module=%s' % type_def
 
@@ -355,7 +330,7 @@ def dhcp_server(my_network_def, ip_dhcp_server_def):
 
 
 if __name__ == '__main__':
-
+    ssh_local_device = ssh_local_device()
     # clients
     ip_device_clients = "192.168.88.1"
     port_access_clients = 22
@@ -379,12 +354,12 @@ if __name__ == '__main__':
 
         while baba == 0:
             out = ssh.exec_cmd ("/system routerboard print")
-            model, serial = parser_model_serial (out)
+            # model, serial = parser_model_serial (out)
 
             first_start = input ('Первый прогон? (yes/no):')
 
             if first_start != "yes":
-                my_network = input ("Введите вашу подсеть: ")
+                # my_network = input ("Введите вашу подсеть: ")
                 # ip_dhcp_server = input ("Введите ip mikotik: ")
                 queue_tree_rate = input ("Введите скорость интернета: (*10M): ")
 
@@ -406,4 +381,4 @@ if __name__ == '__main__':
                 scheduler ()
                 upgrade ()
 
-                baba = 1
+
