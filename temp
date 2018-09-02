@@ -1,0 +1,6 @@
+Flags: X - disabled, R - running, S - slave 
+ #    NAME                                MTU MAC-ADDRESS       ARP            
+ 0 RS ether1                             1500 00:0C:29:DA:CC:E4 enabled        
+ 1 R  ether2                             1500 00:0C:29:06:D2:9F enabled        
+ 2 RS ether3                             1500 00:0C:29:06:D2:95 enabled        
+
