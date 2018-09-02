@@ -42,7 +42,8 @@ def parser_mac():
         if count != 6:
             ii += 1
         else:
-            print(trest[0], trest[4])
+            pass
+
     command_parser = '/interface ethernet print'
     temp = parser(command_parser)
     i = 0
@@ -52,19 +53,17 @@ def parser_mac():
             ii += 1
             if par[2] == trest[0]:
                 parser_mac_address = par[4]
-                print('MAC = ', parser_mac_address)
+
     return parser_mac_address
 
 
 def error_usl(command_input, type_input):
-<<<<<<< HEAD
+
     if command_input == "failure: user with the same name already exisits\n":
         print('already created <type:%s>:' % type_input)
-=======
     if command_input == 'failure: user with the same name already exisits\n':
         print("already created <type:%s>:" % type_input)
         pass
->>>>>>> Тестирование_новых_мудулей
     elif command_input != "":
         print("error <type:%s>:" % type_input, command_input)
 
@@ -290,9 +289,4 @@ if __name__ == '__main__':
             password_mac = users(my_network)
 
         elif type_devices == '3':
-<<<<<<< HEAD
             pass
-=======
-            password_mac = users(my_network)
-            print(password_mac)
->>>>>>> Тестирование_новых_мудулей
