@@ -1,8 +1,45 @@
 import os
+import subprocess
 from class_treatment import *
 from ssh_local_device import *
 
+
 # ========================INPUT-PARAMETER=======================
+
+
+def parser(command_terminal):
+    command = ssh.exec_cmd(command_terminal)
+    temp_file = open('temp', 'w')
+    temp_file.write(command)
+    temp_file.close()
+    temp_file = open('temp', 'r')
+
+    list_return = []
+    for parameter in temp_file:
+        list_temp = []
+        if parameter != '\n':
+            i = 0
+            list_parser = parameter.split(' ')
+            for temp in list_parser:
+                if temp != '':
+                    list_temp.append(temp)
+                    i += 1
+            list_return.append(list_temp)
+
+    temp_file.close()
+
+    return list_return
+
+
+def parser_mac():
+    command = '/interface ethernet print'
+    temp = parser(command)
+    temp.pop(0)
+    temp.pop(0)
+    for par in temp:
+        if par[2] == 'ether1':
+            parser_mac_address = par[4]
+    return parser_mac_address
 
 
 def error_usl(command_input, type_input):
@@ -15,6 +52,7 @@ def class_def(type_error, dir_cfg_def, dir_command):
     class_treatment.set_dir_cfg_def(dir_cfg_def)
     class_treatment.set_dir_command(dir_command)
     input_command_list = class_treatment.result()
+    # print(input_command_list)
     for input_command in input_command_list:
         temp = ssh.exec_cmd(input_command)
         error_usl(temp, type_error)
@@ -22,10 +60,10 @@ def class_def(type_error, dir_cfg_def, dir_command):
 
 def clients():
     # clients
-    ip_device = "192.168.88.1"
+    ip_device = input("input device IP: ")
     port_access = 22
     login_local = "admin"
-    pass_local = ""
+    pass_local = "b3qq4h7h2v"
 
     return ip_device, port_access, login_local, pass_local
 
@@ -38,6 +76,7 @@ def server():
     pass_server = "Pdl48zx0ma3st15!"
 
     return ip_device, port_access, login_server, pass_server
+
 
 # =========================FILTER==============================
 
@@ -87,6 +126,12 @@ def address_list():
     class_def(type_error, dir_cfg, dir_command)
 
 
+def service_port():
+    type_error = 'service-port'
+    dir_command = '/ip firewall service-port set'
+    class_def(type_error, dir_cfg, dir_command)
+
+
 def queue():
     dir_command = '/queue tree add'
     type_error = "queue"
@@ -106,13 +151,23 @@ def queue():
 
 
 def users(network_work):
+    mac_up = parser_mac()
     dir_command = '/user add'
     type_error = "users"
     class_treatment.set_queue_rate(queue_tree_rate_def)
     class_def(type_error, dir_cfg, dir_command)
 
+    password = subprocess.check_output(['C:\Python\Mikrotik\dll\Key.dll', '%s' % mac_up],
+                                       shell=True, universal_newlines=True)
+    password = password.strip('\n')
+
+    # -----------------settings-rinet---------------------------
+    ssh.exec_cmd('/user set rinet password="%s"' % password)
+
     # -----------------settings-admin---------------------------
     ssh.exec_cmd('/user set admin address=%s' % network_work)
+
+    return password
 
 
 def ntp():
@@ -188,7 +243,7 @@ if __name__ == '__main__':
         class_treatment = class_treatment()
         ssh_local_device = ssh_local_device()
 
-        type_devices = input('Введите тип устройства (router (1) / AP (2)): ')
+        type_devices = input('Введите тип устройства (router (1) / AP (2) / test(3): ')
 
         if type_devices == '1':
 
@@ -199,13 +254,19 @@ if __name__ == '__main__':
             firewall()
             mangle()
             address_list()
-            users(my_network)
+            service_port()
+            password_mac = users(my_network)
             queue()
+            print('Password for Rinet: ', password_mac)
 
         elif type_devices == '2':
-
             logging()
             ntp()
             clock()
             identity()
-            users(my_network)
+            password_mac = users(my_network)
+            print('Password for Rinet: ', password_mac)
+
+        elif type_devices == '3':
+            password_mac = users(my_network)
+            print('Password for Rinet: ', password_mac)
