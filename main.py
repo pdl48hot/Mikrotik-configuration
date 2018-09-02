@@ -1,5 +1,6 @@
 import os
 import subprocess
+
 from class_treatment import *
 from ssh_local_device import *
 
@@ -10,6 +11,7 @@ from ssh_local_device import *
 def parser(command_terminal):
     command = ssh.exec_cmd(command_terminal)
     temp_file = open('temp', 'w')
+
     temp_file.write(command)
     temp_file.close()
     temp_file = open('temp', 'r')
@@ -32,18 +34,38 @@ def parser(command_terminal):
 
 
 def parser_mac():
-    command = '/interface ethernet print'
-    temp = parser(command)
-    temp.pop(0)
-    temp.pop(0)
+    command_parser = '/ip dhcp-client print'
+    test = parser(command_parser)
+    ii = 0
+    for trest in test:
+        count = int(len(test[ii]))
+        if count != 6:
+            ii += 1
+        else:
+            print(trest[0], trest[4])
+    command_parser = '/interface ethernet print'
+    temp = parser(command_parser)
+    i = 0
     for par in temp:
-        if par[2] == 'ether1':
-            parser_mac_address = par[4]
+        count = int(len(par[i]))
+        if count != 7:
+            ii += 1
+            if par[2] == trest[0]:
+                parser_mac_address = par[4]
+                print('MAC = ', parser_mac_address)
     return parser_mac_address
 
 
 def error_usl(command_input, type_input):
-    if command_input != "":
+<<<<<<< HEAD
+    if command_input == "failure: user with the same name already exisits\n":
+        print('already created <type:%s>:' % type_input)
+=======
+    if command_input == 'failure: user with the same name already exisits\n':
+        print("already created <type:%s>:" % type_input)
+        pass
+>>>>>>> Тестирование_новых_мудулей
+    elif command_input != "":
         print("error <type:%s>:" % type_input, command_input)
 
 
@@ -63,7 +85,7 @@ def clients():
     ip_device = input("input device IP: ")
     port_access = 22
     login_local = "admin"
-    pass_local = "b3qq4h7h2v"
+    pass_local = ""
 
     return ip_device, port_access, login_local, pass_local
 
@@ -166,7 +188,7 @@ def users(network_work):
 
     # -----------------settings-admin---------------------------
     ssh.exec_cmd('/user set admin address=%s' % network_work)
-
+    print('Password for Rinet account: ', password)
     return password
 
 
@@ -193,27 +215,26 @@ def identity():
 
 # Требуется upgrade кода
 def upgrade():
-    type_def = "upgrade_system"
-    command = ssh.exec_cmd("/system package update download")
+    # type_def = "upgrade_system"
+    command_check = "/system package update check-for-updates"
 
-    reboot_command = input("reboot this device? (yes/no):")
+    version = parser(command_check)
+    current_version = version[4][1]
+    latest_version = version[5][1]
 
-    upgrade_func = 0
+    if latest_version == current_version:
+        pass
 
-    while upgrade_func == 0:
+    elif latest_version != 'ERROR:':
+        print('current-version:', current_version.strip('\n'))
+        print('latest-version:', latest_version.strip('\n'))
 
-        if reboot_command == "yes":
-            command = ssh.exec_cmd("/system reboot")
-            upgrade_func = 1
-
-        elif reboot_command == "no":
-            print("by my friend")
-            upgrade_func = 1
-
+        upgrade_system = input('you want upgrade the system? (yes/no): ')
+        if upgrade_system == 'yes':
+            ssh.exec_cmd('/system package update download')
+            ssh.exec_cmd('/system reboot')
         else:
-            command = input("Введена неверная команда, повторите:")
-
-    error_usl(command, type_def)
+            pass
 
 
 def scheduler():
@@ -223,6 +244,8 @@ def scheduler():
 
 
 my_dir = os.getcwd()
+my_network = '192.168.0.0/16'
+queue_tree_rate_def = 'none'
 dir_cfg = my_dir + '\\mikrotik-config.yml'
 
 if __name__ == '__main__':
@@ -236,9 +259,6 @@ if __name__ == '__main__':
     with ssh_local_device(hostname=ip_device_clients, username=login_local_device,
                           password=pass_local_device, port=port_access_clients) as ssh:
 
-        my_network = input("Введите вашу подсеть: ")
-        queue_tree_rate_def = input("Введите скорость интернета: (*10M): ")
-
         # __init__ class
         class_treatment = class_treatment()
         ssh_local_device = ssh_local_device()
@@ -246,6 +266,9 @@ if __name__ == '__main__':
         type_devices = input('Введите тип устройства (router (1) / AP (2) / test(3): ')
 
         if type_devices == '1':
+            upgrade()
+            queue_tree_rate_def = input("Введите скорость интернета: (*1m/1M): ")
+            queue_tree_rate_def = queue_tree_rate_def.upper()
 
             logging()
             ntp()
@@ -257,16 +280,19 @@ if __name__ == '__main__':
             service_port()
             password_mac = users(my_network)
             queue()
-            print('Password for Rinet: ', password_mac)
 
         elif type_devices == '2':
+            upgrade()
             logging()
             ntp()
             clock()
             identity()
             password_mac = users(my_network)
-            print('Password for Rinet: ', password_mac)
 
         elif type_devices == '3':
+<<<<<<< HEAD
+            pass
+=======
             password_mac = users(my_network)
-            print('Password for Rinet: ', password_mac)
+            print(password_mac)
+>>>>>>> Тестирование_новых_мудулей
