@@ -47,3 +47,9 @@ service-port:
 users:
 - {address: '"10.10.0.1"', group: full, name: zabbix, password: Putilin48}
 - {group: full, name: rinet, password: ''}
+
+ppp-secret-server:
+- {name: ppp_login, password: ppp_password, profile: profile-l2tp, remote-address: ppp_ip, service: l2tp}
+
+ppp-secret-client:
+- {user: ppp_login, password: ppp_password, connect-to: 86.62.82.242, allow: "chap,pap,mschap1,mschap2", name: l2tp-ansible, disabled: 'no'}

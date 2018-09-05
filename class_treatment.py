@@ -23,6 +23,18 @@ class class_treatment:
         class_treatment.queue_rate = queue_rate
 
     @staticmethod
+    def set_ppp_account(ppp_account):
+        class_treatment.ppp_account = ppp_account
+
+    @staticmethod
+    def set_ppp_password(ppp_password):
+        class_treatment.ppp_password = ppp_password
+
+    @staticmethod
+    def set_ppp_next_ip(ppp_next_ip):
+        class_treatment.ppp_next_ip = ppp_next_ip
+
+    @staticmethod
     def result():
 
         temp = []
@@ -43,6 +55,15 @@ class class_treatment:
                     if value == 'tx_rate':
                             new_rules_def.append(' ' + str(key) + '=' + str(class_treatment.queue_rate))
 
+                    elif value == 'ppp_login':
+                            new_rules_def.append(' ' + str(key) + '=' + str(class_treatment.ppp_account))
+
+                    elif value == 'ppp_password':
+                            new_rules_def.append(' ' + str(key) + '=' + str(class_treatment.ppp_password))
+
+                    elif value == 'ppp_ip':
+                            new_rules_def.append(' ' + str(key) + '=' + str(class_treatment.ppp_next_ip))
+
                     else:
                         aKey = ' ' + str(key) + '=' + str(value)
                         new_rules_def.append(aKey)
@@ -51,7 +72,8 @@ class class_treatment:
 
             command = ''.join(new_rules_def)
             temp.append(command)
-        return temp
             # print(temp)
+        return temp
+
 
 
