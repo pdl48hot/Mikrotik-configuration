@@ -1,6 +1,8 @@
 import paramiko
 
+
 class ssh_local_device:
+
     def __init__(self, **kwargs):
         self.client = paramiko.SSHClient ()
         self.client.set_missing_host_key_policy (paramiko.AutoAddPolicy ())

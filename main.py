@@ -2,12 +2,11 @@ import os
 import subprocess
 # import pprint
 
-from my_class.class_treatment import *
 from my_class.ssh_local_device import *
-from my_class.class_ssh_input_command import *
-
+from my_class.class_input_command import *
 
 # ========================INPUT-PARAMETER=======================
+
 
 def parser(command_terminal):
     command = ssh.exec_cmd(command_terminal)
@@ -32,30 +31,6 @@ def parser(command_terminal):
     temp_file.close()
 
     return list_return
-
-
-def parser_mac():
-    command_parser = '/ip dhcp-client print'
-    list_return = parser(command_parser)
-    ii = 0
-    for parser_elements in list_return:
-        count = int(len(list_return[ii]))
-        if count != 6:
-            ii += 1
-        else:
-            pass
-
-    command_parser = '/interface ethernet print'
-    temp = parser(command_parser)
-    i = 0
-    for par in temp:
-        count = int(len(par[i]))
-        if count != 7:
-            ii += 1
-            if par[2] == parser_elements[0]:
-                parser_mac_address = par[4]
-
-    return parser_mac_address
 
 
 def ip_for_client_l2tp():
@@ -98,27 +73,27 @@ def ip_for_client_l2tp():
 
 
 def error_usl(command_input, type_input):
+    if command_input == "failure: user with the same name already exisits\n":
+        print('already created <type:%s>:' % type_input)
 
-    if command_input != "":
+    elif command_input != "":
         print("error <type:%s>:" % type_input, command_input)
 
 
 def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
-    ip_device_client, port_access_client, login_client, pass_client = clients()
 
     # input all parameters
-    class_ssh_input_command.set_type_error(type_error)
-    class_ssh_input_command.set_dir_cfg_def(dir_cfg_def)
-    class_ssh_input_command.set_dir_command(dir_command)
-
-    # input parameters for ssh client
-    class_ssh_input_command.set_ip_device_clients(ip_device_client)
-    class_ssh_input_command.set_login_local_device(login_client)
-    class_ssh_input_command.set_pass_local_device(pass_client)
-    class_ssh_input_command.set_port_access_clients(port_access_client)
+    class_input_command.set_type_error(type_error)
+    class_input_command.set_dir_cfg_def(dir_cfg_def)
+    class_input_command.set_dir_command(dir_command)
 
     # run command across ssh_client
-    class_ssh_input_command.result()
+    list_input_command = class_input_command.result()
+
+    for input_command in list_input_command:
+
+        temp = ssh.exec_cmd(input_command)
+        error_usl(temp, type_error)
 
 
 def clients():
@@ -143,6 +118,31 @@ def server():
 
 
 # =========================FIREWALL============================
+
+def parser_mac():
+    command_parser = '/ip dhcp-client print'
+    list_return = parser(command_parser)
+    ii = 0
+    for parser_elements in list_return:
+        count = int(len(list_return[ii]))
+        if count != 6:
+            ii += 1
+        else:
+            pass
+
+    command_parser = '/interface ethernet print'
+    temp = parser(command_parser)
+    i = 0
+    for par in temp:
+        count = int(len(par[i]))
+        if count != 7:
+            ii += 1
+            if par[2] == parser_elements[0]:
+                parser_mac_address = par[4]
+
+    return parser_mac_address
+
+
 def firewall():
     type_error = 'firewall'
     dir_command = '/ip firewall filter add'
@@ -371,9 +371,13 @@ if __name__ == '__main__':
             created_ppp_account_too_clients(login, password_mac, ip_l2tp_client)
 
         elif type_devices == '3':
-            pass
+            logging()
+            ntp()
+            clock()
 
         with ssh_local_device(hostname=ip_device_server, username=login_server_device,
                               password=pass_server_device, port=port_access_server) as ssh:
-
-            created_ppp_account_too_server(login, password_mac, ip_l2tp_client)
+            try:
+                created_ppp_account_too_server(login, password_mac, ip_l2tp_client)
+            except:
+                print('<error: ppp client not created>')
