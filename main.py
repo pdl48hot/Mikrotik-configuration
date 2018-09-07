@@ -1,8 +1,10 @@
 import os
 import subprocess
 # import pprint
-from class_treatment import *
-from ssh_local_device import *
+
+from my_class.class_treatment import *
+from my_class.ssh_local_device import *
+from my_class.class_ssh_input_command import *
 
 
 # ========================INPUT-PARAMETER=======================
@@ -96,24 +98,27 @@ def ip_for_client_l2tp():
 
 
 def error_usl(command_input, type_input):
-    if command_input == "failure: user with the same name already exisits\n":
-        print('already created <type:%s>:' % type_input)
-    if command_input == 'failure: user with the same name already exisits\n':
-        print("already created <type:%s>:" % type_input)
-        pass
-    elif command_input != "":
+
+    if command_input != "":
         print("error <type:%s>:" % type_input, command_input)
 
 
-def class_def(type_error, dir_cfg_def, dir_command):
-    class_treatment.set_type(type_error)
-    class_treatment.set_dir_cfg_def(dir_cfg_def)
-    class_treatment.set_dir_command(dir_command)
-    input_command_list = class_treatment.result()
-    # print(input_command_list)
-    for input_command in input_command_list:
-        temp = ssh.exec_cmd(input_command)
-        error_usl(temp, type_error)
+def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
+    ip_device_client, port_access_client, login_client, pass_client = clients()
+
+    # input all parameters
+    class_ssh_input_command.set_type_error(type_error)
+    class_ssh_input_command.set_dir_cfg_def(dir_cfg_def)
+    class_ssh_input_command.set_dir_command(dir_command)
+
+    # input parameters for ssh client
+    class_ssh_input_command.set_ip_device_clients(ip_device_client)
+    class_ssh_input_command.set_login_local_device(login_client)
+    class_ssh_input_command.set_pass_local_device(pass_client)
+    class_ssh_input_command.set_port_access_clients(port_access_client)
+
+    # run command across ssh_client
+    class_ssh_input_command.result()
 
 
 def clients():
@@ -148,7 +153,7 @@ def firewall():
     error_usl(command, type_def_filter_delete)
 
     # -------------------------FIREWALL-FILTER-ADD-RULES----------------------------------------------
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 def mangle():
@@ -161,7 +166,7 @@ def mangle():
     error_usl(command, type_def_mangle)
 
     # -------------------------FIREWALL-MANGLE-ADD-RULES----------------------------------------------
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 def address_list():
@@ -174,13 +179,13 @@ def address_list():
     error_usl(command, type_def_address_list_delete)
 
     # -------------------------FIREWALL-ADDRESS-LIST-ADD----------------------------------------------
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 def service_port():
     type_error = 'service-port'
     dir_command = '/ip firewall service-port set'
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 # ===========================QUEUE===============================
@@ -199,18 +204,18 @@ def queue():
 
     # -------------------------QUEUE-TREE-ADD----------------------------------------------------
     class_treatment.set_queue_rate(queue_tree_rate_def)
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 # ===========================MAIN===============================
-def users(network_work):
+def users(network_work, dir_key_user):
     mac_up = parser_mac()
     dir_command = '/user add'
     type_error = "users"
     class_treatment.set_queue_rate(queue_tree_rate_def)
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
-    password = subprocess.check_output(['C:\Python\Mikrotik\dll\Key.dll', '%s' % mac_up],
+    password = subprocess.check_output([dir_key_user, '%s' % mac_up],
                                        shell=True, universal_newlines=True)
     password = password.strip('\n')
 
@@ -227,20 +232,20 @@ def ntp():
     dir_command = '/system ntp client set'
     type_error = "ntp"
     class_treatment.set_queue_rate(queue_tree_rate_def)
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 def clock():
     dir_command = '/system clock set'
     type_error = "clock"
     class_treatment.set_queue_rate(queue_tree_rate_def)
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 def logging():
     type_error = 'logging'
     dir_command = '/system logging set'
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 def identity():
@@ -261,7 +266,7 @@ def created_ppp_account_too_server(login_device, password, ip_l2tp):
     class_treatment.set_ppp_password(password)
     class_treatment.set_ppp_next_ip(ip_l2tp)
 
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 def created_ppp_account_too_clients(login_device, password, ip_l2tp):
@@ -272,7 +277,7 @@ def created_ppp_account_too_clients(login_device, password, ip_l2tp):
     class_treatment.set_ppp_password(password)
     class_treatment.set_ppp_next_ip(ip_l2tp)
 
-    class_def(type_error, dir_cfg, dir_command)
+    run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
 # =========================SYSTEM==================================
@@ -309,7 +314,8 @@ def scheduler():
 my_dir = os.getcwd()
 my_network = '192.168.0.0/16'
 queue_tree_rate_def = 'none'
-dir_cfg = my_dir + '\\mikrotik-config.yml'
+dir_cfg = my_dir + '\\config\\mikrotik-config.yml'
+dir_key = my_dir + '\\Key\\Key.dll'
 class_treatment = class_treatment()
 
 type_devices = input('Введите тип устройства (router (1) / AP (2) / test(3): ')
@@ -345,7 +351,7 @@ if __name__ == '__main__':
             mangle()
             address_list()
             service_port()
-            password_mac = users(my_network)
+            password_mac = users(my_network, dir_key)
 
             queue_tree_rate_def = input("Введите скорость интернета: (*1m/1M): ")
             queue_tree_rate_def = queue_tree_rate_def.upper()
@@ -360,13 +366,7 @@ if __name__ == '__main__':
             clock()
             login = identity()
 
-            password_mac = users(my_network)
-
-            with ssh_local_device(hostname=ip_device_server, username=login_server_device,
-                                  password=pass_server_device, port=port_access_server) as ssh:
-
-                ip_l2tp_client = ip_for_client_l2tp()
-                created_ppp_account_too_server(login, password_mac, ip_l2tp_client)
+            password_mac = users(my_network, dir_key)
 
             created_ppp_account_too_clients(login, password_mac, ip_l2tp_client)
 

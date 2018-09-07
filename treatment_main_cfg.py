@@ -5,7 +5,7 @@ def class_def(type_error, dir_cfg_def, dir_command):
     class_treatment.set_type(type_error)
     class_treatment.set_dir_cfg_def(dir_cfg_def)
     class_treatment.set_dir_command(dir_command)
-    class_treatment.result()
+    result()
 
 
 def firewall():
