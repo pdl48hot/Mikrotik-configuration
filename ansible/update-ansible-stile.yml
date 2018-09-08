@@ -1,0 +1,61 @@
+- name: input channel
+  action: command sshpass -p {{ansible_password}} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} "/system package update set channel=bugfix"
+  connection: local
+
+- name: resolve mikrotik update server
+  action: command sshpass -p {{ansible_password}} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} ":put [:resolve upgrade.mikrotik.com]"
+  connection: local
+
+- name: check-for-updates
+  action: command sshpass -p {{ ansible_password }} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} "/system package update check-for-updates"
+  connection: local
+
+
+- name: check latest-version firmware
+  action: command sshpass -p {{ansible_password}} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} ":put [/system package update get latest-version]"
+  register: latest_version
+  connection: local
+
+- name: check installed-version firmware
+  action: command sshpass -p {{ansible_password}} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} ":put [/system package update get installed-version]"
+  register: installed_version
+  connection: local
+
+- name: print latest_version
+  debug:
+    var: latest_version.stdout
+
+- name: print installed_versio
+  debug:
+    var: installed_version.stdout
+
+# НУЖНО НАСТРОИТЬ ПРАВИЛО С ДОП АРГУМЕНТОМ ЕСЛИ ЛАТЕСТ НЕ РАВЕН НУЛЮ!!!!
+
+- name: download latest firmware
+  action: command sshpass -p {{ansible_password}} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} "/system package update download"
+  connection: local
+  when: latest_version.stdout != installed_version.stdout
+
+- name: download latest firmware
+  action: command sshpass -p {{ansible_password}} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} "/system package update download"
+  connection: local
+  when: "latest_version.stdout != installed_version.stdout and latest_version.stdout != ''"
+
+- name: reboot system
+  action: command sshpass -p {{ansible_password}} ssh -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} "/system reboot"
+  connection: local
+  when: "latest_version.stdout != installed_version.stdout and latest_version.stdout != ''"
+  async: 1
+  poll: 0
+  ignore_errors: true
+
+- pause:
+    seconds: 5
+  when: "latest_version.stdout != installed_version.stdout and latest_version.stdout != ''"
+
+- wait_for:
+    port: 22
+    host: "{{ ansible_host }}"
+  connection: local
+  when: "latest_version.stdout != installed_version.stdout and latest_version.stdout != ''"
+
