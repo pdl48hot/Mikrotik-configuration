@@ -1,5 +1,6 @@
 from my_class.class_treatment import *
 
+
 class class_input_command:
 
     def __init__(self):
@@ -17,22 +18,6 @@ class class_input_command:
     def set_dir_command(dir_command):
         class_input_command.dir_command = dir_command
 
-    # @staticmethod
-    # def set_ip_device_clients(ip_device_clients):
-    #     class_ssh_input_command.ip_device_clients = ip_device_clients
-    #
-    # @staticmethod
-    # def set_login_local_device(login_local_device):
-    #     class_ssh_input_command.login_local_device = login_local_device
-    #
-    # @staticmethod
-    # def set_pass_local_device(pass_local_device):
-    #     class_ssh_input_command.pass_local_device = pass_local_device
-    #
-    # @staticmethod
-    # def set_port_access_clients(port_access_clients):
-    #     class_ssh_input_command.port_access_clients = port_access_clients
-
     @staticmethod
     def result():
 
@@ -44,12 +29,6 @@ class class_input_command:
         list_input_command = []
 
         for input_command in input_command_list:
-            # print(input_command)
-
-            # with ssh_local_device(hostname=class_ssh_input_command.ip_device_clients,
-            #                       username=class_ssh_input_command.login_local_device,
-            #                       password=class_ssh_input_command.pass_local_device,
-            #                       port=class_ssh_input_command.port_access_clients) as ssh:
 
             list_input_command.append(input_command)
 
