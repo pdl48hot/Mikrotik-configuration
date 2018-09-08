@@ -9,8 +9,7 @@ class ssh_local_device:
         self.kwargs = kwargs
 
     def __enter__(self):
-        """код для подключения к удаленному хосту с импрортируемым модулем paramiko"""
-        kw = self.kwargs
+
         self.client.connect (hostname=kw.get ('hostname'), username=kw.get ('username'),
                              password=kw.get ('password'), port=int (kw.get ('port', 22)))
         return self
@@ -19,7 +18,7 @@ class ssh_local_device:
         self.client.close ()
 
     def exec_cmd(self, cmd):
-        """ Необходимо выполнить команду с помощью скрипта (к прим. ls -al)"""
+        
         stdin, stdout, stderr = self.client.exec_command (cmd)
         data = stdout.read ()
         # if stderr:
