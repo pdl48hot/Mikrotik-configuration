@@ -4,30 +4,15 @@ import subprocess
 
 from my_class.ssh_local_device import *
 from my_class.class_input_command import *
+from my_class.parser_output_ssh import *
 
 # ========================INPUT-PARAMETER=======================
 
 
 def parser(command_terminal):
     command = ssh.exec_cmd(command_terminal)
-    temp_file = open('temp', 'w')
-    temp_file.write(command)
-    temp_file.close()
-    temp_file = open('temp', 'r')
-
-    list_return = []
-    for parameter in temp_file:
-        list_temp = []
-        if parameter != '\n':
-            i = 0
-            list_parser = parameter.split(' ')
-            for temp in list_parser:
-                if temp != '':
-                    list_temp.append(temp)
-                    i += 1
-            list_return.append(list_temp)
-
-    temp_file.close()
+    parser_output_ssh.set_output_command(command)
+    list_return = parser_output_ssh.result()
 
     return list_return
 
@@ -134,6 +119,7 @@ def parser_mac():
     i = 0
     for par in temp:
         count = int(len(par[i]))
+
         if count != 7:
             ii += 1
             if par[2] == parser_elements[0]:
@@ -211,11 +197,8 @@ def users(network_work, dir_key_user):
     mac_up = parser_mac()
     dir_command = '/user add'
     type_error = "users"
-    class_treatment.set_queue_rate(queue_tree_rate_def)
     run_configuration_across_ssh(type_error, dir_cfg, dir_command)
-
-    password = subprocess.check_output([dir_key_user, '%s' % mac_up],
-                                       shell=True, universal_newlines=True)
+    password = subprocess.check_output([dir_key_user, '%s' % mac_up], shell=True, universal_newlines=True)
     password = password.strip('\n')
 
     # -----------------settings-rinet---------------------------
@@ -227,6 +210,7 @@ def users(network_work, dir_key_user):
     return password
 
 
+# ansile +
 def ntp():
     dir_command = '/system ntp client set'
     type_error = "ntp"
@@ -234,13 +218,14 @@ def ntp():
     run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
 
+# ansile +
 def clock():
     dir_command = '/system clock set'
     type_error = "clock"
     class_treatment.set_queue_rate(queue_tree_rate_def)
     run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
-
+# ansile +
 def logging():
     type_error = 'logging'
     dir_command = '/system logging set'
