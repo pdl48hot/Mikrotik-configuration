@@ -11,7 +11,6 @@ from my_class.class_input_command import *
 def parser(command_terminal):
     command = ssh.exec_cmd(command_terminal)
     temp_file = open('temp', 'w')
-
     temp_file.write(command)
     temp_file.close()
     temp_file = open('temp', 'r')
