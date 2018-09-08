@@ -9,7 +9,7 @@ class ssh_local_device:
         self.kwargs = kwargs
 
     def __enter__(self):
-
+        kw = self.kwargs  
         self.client.connect (hostname=kw.get ('hostname'), username=kw.get ('username'),
                              password=kw.get ('password'), port=int (kw.get ('port', 22)))
         return self
@@ -18,7 +18,7 @@ class ssh_local_device:
         self.client.close ()
 
     def exec_cmd(self, cmd):
-        
+
         stdin, stdout, stderr = self.client.exec_command (cmd)
         data = stdout.read ()
         # if stderr:
