@@ -10,6 +10,7 @@ from my_class.parser_output_ssh import *
 
 
 def parser(command_terminal):
+    
     command = ssh.exec_cmd(command_terminal)
     parser_output_ssh.set_output_command(command)
     list_return = parser_output_ssh.result()
@@ -83,7 +84,7 @@ def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
 def clients():
     # clients
     # ip_device = input("input device IP: ")
-    ip_device = "192.168.1.106"
+    ip_device = "192.168.88.1"
     port_access = 22
     login_local = "admin"
     pass_local = ""
@@ -104,20 +105,24 @@ def server():
 # =========================FIREWALL============================
 
 def parser_mac():
+
     number_i = 0
     status_start = "ok"
+    list_interfaces = []
+
     while status_start == "ok":
         command_parser = ': put [ip dhcp-client get number=%s interface ]' % number_i
-        interface = ssh.exec_cmd(command_parser)
+        interface = ssh.exec_cmd(command_parser).strip("\r\n")
+
         if interface == "no such item":
             status_start = "no"
-        else:
 
-            command_parser = ': put [interface get %s mac-address]' % interface.strip("\r\n")
-            pprint.pprint(command_parser)
+        else:
+            command_parser = ': put [interface get %s mac-address]' % interface
             parser_mac_address = ssh.exec_cmd(command_parser)
-            status_start = "no"
-            print(parser_mac_address)
+            list_interfaces.append(interface)
+            number_i += 1
+
     return parser_mac_address
 
 
