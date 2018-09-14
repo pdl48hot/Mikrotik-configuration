@@ -1,6 +1,6 @@
 import os
 import subprocess
-# import pprint
+import pprint
 
 from my_class.ssh_local_device import *
 from my_class.class_input_command import *
@@ -83,7 +83,7 @@ def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
 def clients():
     # clients
     # ip_device = input("input device IP: ")
-    ip_device = "192.168.88.1"
+    ip_device = "192.168.1.106"
     port_access = 22
     login_local = "admin"
     pass_local = ""
@@ -104,27 +104,20 @@ def server():
 # =========================FIREWALL============================
 
 def parser_mac():
-    command_parser = '/ip dhcp-client print'
-    list_return = parser(command_parser)
-    ii = 0
-    for parser_elements in list_return:
-        count = int(len(list_return[ii]))
-        if count != 6:
-            ii += 1
+    number_i = 0
+    status_start = "ok"
+    while status_start == "ok":
+        command_parser = ': put [ip dhcp-client get number=%s interface ]' % number_i
+        interface = ssh.exec_cmd(command_parser)
+        if interface == "no such item":
+            status_start = "no"
         else:
-            pass
 
-    command_parser = '/interface ethernet print'
-    temp = parser(command_parser)
-    i = 0
-    for par in temp:
-        count = int(len(par[i]))
-
-        if count != 7:
-            ii += 1
-            if par[2] == parser_elements[0]:
-                parser_mac_address = par[4]
-
+            command_parser = ': put [interface get %s mac-address]' % interface.strip("\r\n")
+            pprint.pprint(command_parser)
+            parser_mac_address = ssh.exec_cmd(command_parser)
+            status_start = "no"
+            print(parser_mac_address)
     return parser_mac_address
 
 
