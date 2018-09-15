@@ -1,6 +1,7 @@
 import os
 import subprocess
-# import pprint
+import pprint
+import yaml
 
 from my_class.ssh_local_device import *
 from my_class.class_input_command import *
@@ -295,6 +296,64 @@ def scheduler():
     error_usl(command, type_def)
 
 
+def test():
+    type_error = 'logging'
+        ##
+    with open(dir_cfg, 'r') as cfg_lines:
+        config = cfg_lines.read()
+        data = yaml.safe_load(config)
+        dictList = data[type_error]
+        number_item = 0
+        changed = 0
+
+        for iterator in dictList:
+
+            # My attempt:
+            for key, value in iterator.items():
+
+                if key == 'numbers':
+                    cfg_old = str('.id=*%s;' % (value + 1))
+
+                else:
+                    aKey = str(key) + '=' + str(value) + ';'
+                    cfg_old = cfg_old + aKey
+
+            cfg_old = cfg_old.strip(';')
+
+            command = ': put [system logging get number=%s]' % number_item
+            command2 = ': put [system logging export]'
+            test = parser(command2)
+
+
+
+
+            number_item += 1
+            cfg_new = ssh.exec_cmd(command).strip("\r\n")
+            cfg_new = cfg_new.strip("'")
+            #print(cfg_new)
+            list_cfg = cfg_new.split(';')
+            for temp in list_cfg:
+                #print(temp)
+                pass
+            #print(list_cfg)
+            if cfg_new != cfg_old:
+                changed = changed + 1
+            else:
+                changed = changed
+    pprint.pprint(test)
+    for tt in test:
+        test.remove('#')
+
+    print(test)
+    if changed == 0:
+        changed = False
+
+    else:
+        changed = True
+
+
+
+
 my_dir = os.getcwd()
 my_network = '192.168.0.0/16'
 queue_tree_rate_def = 'none'
@@ -355,9 +414,7 @@ if __name__ == '__main__':
             created_ppp_account_too_clients(login, password_mac, ip_l2tp_client)
 
         elif type_devices == '3':
-            logging()
-            ntp()
-            clock()
+            test()
 
         with ssh_local_device(hostname=ip_device_server, username=login_server_device,
                               password=pass_server_device, port=port_access_server) as ssh:
