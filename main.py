@@ -304,53 +304,45 @@ def test():
         data = yaml.safe_load(config)
         dictList = data[type_error]
         number_item = 0
-        changed = 0
+        list_test = []
+        num = 0
 
-        for iterator in dictList:
+        command = ': put [system logging get number=%s]' % number_item
 
-            # My attempt:
-            for key, value in iterator.items():
+        test = ssh.exec_cmd(command)
+        print(test)
+        list_t = test.split('=')
+        cc = int(len(list_t))
+        #print(cc)
+        #print(list_t)
+        exit_key = list_t[cc-1]
+        #print(exit_key)
+        for temp in list_t:
+            list_temp = temp.split(';')
 
-                if key == 'numbers':
-                    cfg_old = str('.id=*%s;' % (value + 1))
+            count_list = int(len(list_temp))
+            if list_temp[num] == '.id' and count_list == 1:
+                list_test.append(list_temp[num])
+            elif count_list >= 2:
+                key = list_temp[-1]
+                list_temp.pop(-1)
+                if int(len(list_temp)) > 0:
+                    nn = 0
+                    list_from_test = []
+                    for debug_list in list_temp:
+                        debug_list = debug_list + ','
+                        list_from_test.append(debug_list)
+                    list_temp = list_from_test
 
-                else:
-                    aKey = str(key) + '=' + str(value) + ';'
-                    cfg_old = cfg_old + aKey
+                print(list_temp)
+                value = ''.join(list_temp)
+                #print(value)
+                gg = str(': ') + str(value)
 
-            cfg_old = cfg_old.strip(';')
-
-            command = ': put [system logging get number=%s]' % number_item
-            command2 = ': put [system logging export]'
-            test = parser(command2)
-
-
-
-
-            number_item += 1
-            cfg_new = ssh.exec_cmd(command).strip("\r\n")
-            cfg_new = cfg_new.strip("'")
-            #print(cfg_new)
-            list_cfg = cfg_new.split(';')
-            for temp in list_cfg:
-                #print(temp)
-                pass
-            #print(list_cfg)
-            if cfg_new != cfg_old:
-                changed = changed + 1
-            else:
-                changed = changed
-    pprint.pprint(test)
-    for tt in test:
-        test.remove('#')
-
-    print(test)
-    if changed == 0:
-        changed = False
-
-    else:
-        changed = True
-
+                list_test.append(gg)
+                list_test.append(key)
+        print(list_test)
+        print(''.join(list_test))
 
 
 

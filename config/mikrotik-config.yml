@@ -29,10 +29,11 @@ service-port:
 
 # Ansible integrated
 logging:
-- {numbers: 0, action: disk, topics: 'info;!ppp;!wireless'}
-- {numbers: 1, action: disk, topics: 'error'}
-- {numbers: 2, action: disk, topics: 'warning'}
-- {numbers: 3, action: disk, topics: 'critical'}
+- {action: disk, disabled: 'no', numbers: 0, topics: '"info,!ppp,!wireless"'}
+- {action: disk, disabled: 'no', numbers: 1, topics: '"error"'}
+- {action: disk, disabled: 'no', numbers: 2, topics: '"warning"'}
+- {action: disk, disabled: 'no', numbers: 3, topics: '"critical"'}
+
 
 # Ansible integrated
 ntp:
