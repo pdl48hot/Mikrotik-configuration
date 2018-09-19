@@ -330,7 +330,7 @@ def test():
                     nn = 0
                     list_from_test = []
                     for debug_list in list_temp:
-                        debug_list = debug_list + ','
+                        debug_list = '"' + debug_list + '"' + ','
                         list_from_test.append(debug_list)
                     list_temp = list_from_test
 
