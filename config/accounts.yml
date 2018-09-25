@@ -1,0 +1,3 @@
+accounts:
+- {name_server: 'ansible', password_server: 'Pdl48zx0ma3st15!'}
+- {name_client: 'admin', password_client: ''}
