@@ -1,11 +1,10 @@
-import os
 import subprocess
-import pprint
-import yaml
 
 from my_class.ssh_local_device import *
 from my_class.class_input_command import *
 from my_class.parser_output_ssh import *
+from my_class.class_security import *
+
 
 # ========================INPUT-PARAMETER=======================
 
@@ -66,8 +65,8 @@ def error_usl(command_input, type_input):
 
 
 def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
-
     # input all parameters
+
     class_input_command.set_type_error(type_error)
     class_input_command.set_dir_cfg_def(dir_cfg_def)
     class_input_command.set_dir_command(dir_command)
@@ -76,7 +75,6 @@ def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
     list_input_command = class_input_command.result()
 
     for input_command in list_input_command:
-
         temp = ssh.exec_cmd(input_command)
         error_usl(temp, type_error)
 
@@ -94,6 +92,7 @@ def clients():
 
 def server():
     # parameters server
+
     ip_device = "86.62.82.242"
     port_access = 64222
     login_server = "ansible"
@@ -226,6 +225,7 @@ def clock():
     class_treatment.set_queue_rate(queue_tree_rate_def)
     run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
+
 # ansile +
 def logging():
     type_error = 'logging'
@@ -296,56 +296,6 @@ def scheduler():
     error_usl(command, type_def)
 
 
-def test():
-    type_error = 'logging'
-        ##
-    with open(dir_cfg, 'r') as cfg_lines:
-        config = cfg_lines.read()
-        data = yaml.safe_load(config)
-        dictList = data[type_error]
-        number_item = 0
-        list_test = []
-        num = 0
-
-        command = ': put [system logging get number=%s]' % number_item
-
-        test = ssh.exec_cmd(command)
-        print(test)
-        list_t = test.split('=')
-        cc = int(len(list_t))
-        #print(cc)
-        #print(list_t)
-        exit_key = list_t[cc-1]
-        #print(exit_key)
-        for temp in list_t:
-            list_temp = temp.split(';')
-
-            count_list = int(len(list_temp))
-            if list_temp[num] == '.id' and count_list == 1:
-                list_test.append(list_temp[num])
-            elif count_list >= 2:
-                key = list_temp[-1]
-                list_temp.pop(-1)
-                if int(len(list_temp)) > 0:
-                    nn = 0
-                    list_from_test = []
-                    for debug_list in list_temp:
-                        debug_list = '"' + debug_list + '"' + ','
-                        list_from_test.append(debug_list)
-                    list_temp = list_from_test
-
-                print(list_temp)
-                value = ''.join(list_temp)
-                #print(value)
-                gg = str(': ') + str(value)
-
-                list_test.append(gg)
-                list_test.append(key)
-        print(list_test)
-        print(''.join(list_test))
-
-
-
 my_dir = os.getcwd()
 my_network = '192.168.0.0/16'
 queue_tree_rate_def = 'none'
@@ -406,7 +356,7 @@ if __name__ == '__main__':
             created_ppp_account_too_clients(login, password_mac, ip_l2tp_client)
 
         elif type_devices == '3':
-            test()
+            pass
 
         with ssh_local_device(hostname=ip_device_server, username=login_server_device,
                               password=pass_server_device, port=port_access_server) as ssh:
