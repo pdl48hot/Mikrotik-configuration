@@ -1,15 +1,23 @@
 import subprocess
+<<<<<<< HEAD
+import pprint
+=======
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
 from my_class.ssh_local_device import *
 from my_class.class_input_command import *
 from my_class.parser_output_ssh import *
+<<<<<<< HEAD
+=======
 from my_class.class_security import *
 
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
 # ========================INPUT-PARAMETER=======================
 
 
 def parser(command_terminal):
+    
     command = ssh.exec_cmd(command_terminal)
     parser_output_ssh.set_output_command(command)
     list_return = parser_output_ssh.result()
@@ -100,16 +108,25 @@ def server():
 # =========================FIREWALL============================
 
 def parser_mac():
-    command_parser = '/ip dhcp-client print'
-    list_return = parser(command_parser)
-    ii = 0
-    for parser_elements in list_return:
-        count = int(len(list_return[ii]))
-        if count != 6:
-            ii += 1
-        else:
-            pass
 
+<<<<<<< HEAD
+    number_i = 0
+    status_start = "ok"
+    list_interfaces = []
+
+    while status_start == "ok":
+        command_parser = ': put [ip dhcp-client get number=%s interface ]' % number_i
+        interface = ssh.exec_cmd(command_parser).strip("\r\n")
+
+        if interface == "no such item":
+            status_start = "no"
+
+        else:
+            command_parser = ': put [interface get %s mac-address]' % interface
+            parser_mac_address = ssh.exec_cmd(command_parser)
+            list_interfaces.append(interface)
+            number_i += 1
+=======
     command_parser = '/interface ethernet print'
     temp = parser(command_parser)
     i = 0
@@ -120,6 +137,7 @@ def parser_mac():
             ii += 1
             if par[2] == parser_elements[0]:
                 parser_mac_address = par[4]
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
     return parser_mac_address
 
@@ -221,7 +239,10 @@ def clock():
     class_treatment.set_queue_rate(queue_tree_rate_def)
     run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 # ansile +
 def logging():
     type_error = 'logging'
@@ -294,12 +315,12 @@ def scheduler():
 
 my_dir = os.getcwd()
 my_network = '192.168.0.0/16'
-queue_tree_rate_def = 'none'
+queue_tree_rate_def = None
 dir_cfg = my_dir + '\\config\\mikrotik-config.yml'
 dir_key = my_dir + '\\Key\\Key.dll'
 class_treatment = class_treatment()
 
-type_devices = input('Введите тип устройства (router (1) / AP (2) / test(3): ')
+type_devices = input('Введите тип устройства (router (1) / AP (2): ')
 
 if __name__ == '__main__':
 
@@ -316,10 +337,6 @@ if __name__ == '__main__':
 
     with ssh_local_device(hostname=ip_device_clients, username=login_local_device,
                           password=pass_local_device, port=port_access_clients) as ssh:
-
-        # __init__ class
-
-        # ssh_local_device = ssh_local_device()
 
         if type_devices == '1':
             upgrade()
