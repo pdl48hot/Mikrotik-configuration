@@ -78,27 +78,23 @@ def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
         temp = ssh.exec_cmd(input_command)
         error_usl(temp, type_error)
 
-
+		
 def clients():
     # clients
-    # ip_device = input("input device IP: ")
-    ip_device = "192.168.88.1"
+    client_uid = 1
+    login_local, pass_local = account.result(user_uid=client_uid)
+    ip_device = "192.168.1.1"
     port_access = 22
-    login_local = "admin"
-    pass_local = ""
 
     return ip_device, port_access, login_local, pass_local
 
 
 def server():
     # parameters server
+    server_uid = 0
+    login_server, pass_server, port_access, hostname_server = account.result(user_uid=server_uid)
 
-    ip_device = "86.62.82.242"
-    port_access = 64222
-    login_server = "ansible"
-    pass_server = "Pdl48zx0ma3st15!"
-
-    return ip_device, port_access, login_server, pass_server
+    return hostname_server, port_access, login_server, pass_server
 
 
 # =========================FIREWALL============================
