@@ -1,10 +1,17 @@
-import os
 import subprocess
+<<<<<<< HEAD
 import pprint
+=======
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
 from my_class.ssh_local_device import *
 from my_class.class_input_command import *
 from my_class.parser_output_ssh import *
+<<<<<<< HEAD
+=======
+from my_class.class_security import *
+
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
 # ========================INPUT-PARAMETER=======================
 
@@ -66,8 +73,8 @@ def error_usl(command_input, type_input):
 
 
 def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
-
     # input all parameters
+
     class_input_command.set_type_error(type_error)
     class_input_command.set_dir_cfg_def(dir_cfg_def)
     class_input_command.set_dir_command(dir_command)
@@ -76,36 +83,33 @@ def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
     list_input_command = class_input_command.result()
 
     for input_command in list_input_command:
-
         temp = ssh.exec_cmd(input_command)
         error_usl(temp, type_error)
 
 
 def clients():
     # clients
-    # ip_device = input("input device IP: ")
-    ip_device = "192.168.88.1"
+    client_uid = 1
+    login_local, pass_local = account.result(user_uid=client_uid)
+    ip_device = "192.168.1.1"
     port_access = 22
-    login_local = "admin"
-    pass_local = ""
 
     return ip_device, port_access, login_local, pass_local
 
 
 def server():
     # parameters server
-    ip_device = "86.62.82.242"
-    port_access = 64222
-    login_server = "ansible"
-    pass_server = "Pdl48zx0ma3st15!"
+    server_uid = 0
+    login_server, pass_server, port_access, hostname_server = account.result(user_uid=server_uid)
 
-    return ip_device, port_access, login_server, pass_server
+    return hostname_server, port_access, login_server, pass_server
 
 
 # =========================FIREWALL============================
 
 def parser_mac():
 
+<<<<<<< HEAD
     number_i = 0
     status_start = "ok"
     list_interfaces = []
@@ -122,6 +126,18 @@ def parser_mac():
             parser_mac_address = ssh.exec_cmd(command_parser)
             list_interfaces.append(interface)
             number_i += 1
+=======
+    command_parser = '/interface ethernet print'
+    temp = parser(command_parser)
+    i = 0
+    for par in temp:
+        count = int(len(par[i]))
+
+        if count != 7:
+            ii += 1
+            if par[2] == parser_elements[0]:
+                parser_mac_address = par[4]
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
     return parser_mac_address
 
@@ -223,6 +239,10 @@ def clock():
     class_treatment.set_queue_rate(queue_tree_rate_def)
     run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 # ansile +
 def logging():
     type_error = 'logging'
@@ -295,12 +315,12 @@ def scheduler():
 
 my_dir = os.getcwd()
 my_network = '192.168.0.0/16'
-queue_tree_rate_def = 'none'
+queue_tree_rate_def = None
 dir_cfg = my_dir + '\\config\\mikrotik-config.yml'
 dir_key = my_dir + '\\Key\\Key.dll'
 class_treatment = class_treatment()
 
-type_devices = input('Введите тип устройства (router (1) / AP (2) / test(3): ')
+type_devices = input('Введите тип устройства (router (1) / AP (2): ')
 
 if __name__ == '__main__':
 
@@ -317,10 +337,6 @@ if __name__ == '__main__':
 
     with ssh_local_device(hostname=ip_device_clients, username=login_local_device,
                           password=pass_local_device, port=port_access_clients) as ssh:
-
-        # __init__ class
-
-        # ssh_local_device = ssh_local_device()
 
         if type_devices == '1':
             upgrade()
@@ -353,9 +369,7 @@ if __name__ == '__main__':
             created_ppp_account_too_clients(login, password_mac, ip_l2tp_client)
 
         elif type_devices == '3':
-            logging()
-            ntp()
-            clock()
+            pass
 
         with ssh_local_device(hostname=ip_device_server, username=login_server_device,
                               password=pass_server_device, port=port_access_server) as ssh:

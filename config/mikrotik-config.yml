@@ -1,11 +1,9 @@
+
 address-list:
 - {address: 86.62.127.224/28, list: '"remote_access"'}
 - {address: 86.62.82.242, list: '"remote_access"'}
 - {address: 172.16.255.254, list: '"remote_access"'}
 - {address: 10.10.0.1, list: '"remote_access"'}
-
-clock:
-- {time-zone-autodetect: 'no', time-zone-name: '"Europe/Moscow"'}
 
 firewall:
 - {action: accept, chain: input, comment: '"remote access for rinet"', src-address-list: '"remote_access"'}
@@ -20,29 +18,36 @@ firewall:
 - {action: drop, chain: forward, comment: '"drop all from WAN not DSTNATed"', connection-nat-state: '!dstnat',
   connection-state: new, in-interface-list: WAN}
 
-logging:
-- {action: disk, disabled: 'no', numbers: 0, topics: '"info,!ppp,!wireless"'}
-- {action: disk, disabled: 'no', numbers: 1, topics: '"error"'}
-- {action: disk, disabled: 'no', numbers: 2, topics: '"warning"'}
-- {action: disk, disabled: 'no', numbers: 3, topics: '"critical"'}
-
 mangle:
 - {action: mark-connection, chain: forward, comment: '"auto mangle rule"', connection-mark: no-mark,
   dst-address: '"!192.168.88.0/24"', new-connection-mark: new_mark_conn, passthrough: 'yes'}
 - {action: mark-packet, chain: forward, comment: '"auto mangle rule"', connection-mark: new_mark_conn,
   new-packet-mark: mark_packet->new_con, passthrough: 'yes'}
 
+service-port:
+- {sip-direct-media: no sip}
+
+# Ansible integrated
+logging:
+- {action: disk, disabled: 'no', numbers: 0, topics: '"info,!ppp,!wireless"'}
+- {action: disk, disabled: 'no', numbers: 1, topics: '"error"'}
+- {action: disk, disabled: 'no', numbers: 2, topics: '"warning"'}
+- {action: disk, disabled: 'no', numbers: 3, topics: '"critical"'}
+
+
+# Ansible integrated
 ntp:
 - {enabled: 'yes', primary-ntp: '"195.54.192.33"'}
+
+# Ansible integrated
+clock:
+- {time-zone-autodetect: 'no', time-zone-name: '"Europe/Moscow"'}
 
 queue:
 - {limit-at: tx_rate, max-limit: tx_rate, name: pcq_upload, packet-mark: '"mark_packet->new_con"',
   parent: global, queue: pcq-upload-default}
 - {limit-at: tx_rate, max-limit: tx_rate, name: pcq_download, packet-mark: '"mark_packet->new_con"',
   parent: global, queue: pcq-download-default}
-
-service-port:
-- {sip-direct-media: no sip}
 
 users:
 - {address: '"10.10.0.1"', group: full, name: zabbix, password: Putilin48}

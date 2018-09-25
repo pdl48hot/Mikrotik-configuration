@@ -1,7 +1,7 @@
 import paramiko
 
 
-class ssh_local_device:
+class class_ssh_server:
 
     def __init__(self, **kwargs):
         self.client = paramiko.SSHClient ()
@@ -9,7 +9,7 @@ class ssh_local_device:
         self.kwargs = kwargs
 
     def __enter__(self):
-        kw = self.kwargs  
+        kw = self.kwargs
         self.client.connect (hostname=kw.get ('hostname'), username=kw.get ('username'),
                              password=kw.get ('password'), port=kw.get ('port'))
         return self
