@@ -1,17 +1,13 @@
 import subprocess
-<<<<<<< HEAD
+
 import pprint
-=======
->>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
 from my_class.ssh_local_device import *
 from my_class.class_input_command import *
 from my_class.parser_output_ssh import *
-<<<<<<< HEAD
-=======
+
 from my_class.class_security import *
 
->>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
 
 # ========================INPUT-PARAMETER=======================
 
@@ -109,7 +105,6 @@ def server():
 
 def parser_mac():
 
-<<<<<<< HEAD
     number_i = 0
     status_start = "ok"
     list_interfaces = []
@@ -126,7 +121,7 @@ def parser_mac():
             parser_mac_address = ssh.exec_cmd(command_parser)
             list_interfaces.append(interface)
             number_i += 1
-=======
+
     command_parser = '/interface ethernet print'
     temp = parser(command_parser)
     i = 0
@@ -137,7 +132,7 @@ def parser_mac():
             ii += 1
             if par[2] == parser_elements[0]:
                 parser_mac_address = par[4]
->>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
+
 
     return parser_mac_address
 
@@ -239,10 +234,9 @@ def clock():
     class_treatment.set_queue_rate(queue_tree_rate_def)
     run_configuration_across_ssh(type_error, dir_cfg, dir_command)
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 5d054774cf3fa9c8ab32754e34e7fec090c31193
+
+
 # ansile +
 def logging():
     type_error = 'logging'
