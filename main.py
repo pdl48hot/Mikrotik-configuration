@@ -81,24 +81,20 @@ def run_configuration_across_ssh(type_error, dir_cfg_def, dir_command):
 
 def clients():
     # clients
-    # ip_device = input("input device IP: ")
-    ip_device = "192.168.88.1"
+    client_uid = 1
+    login_local, pass_local = account.result(user_uid=client_uid)
+    ip_device = "192.168.1.1"
     port_access = 22
-    login_local = "admin"
-    pass_local = ""
 
     return ip_device, port_access, login_local, pass_local
 
 
 def server():
     # parameters server
+    server_uid = 0
+    login_server, pass_server, port_access, hostname_server = account.result(user_uid=server_uid)
 
-    ip_device = "86.62.82.242"
-    port_access = 64222
-    login_server = "ansible"
-    pass_server = "Pdl48zx0ma3st15!"
-
-    return ip_device, port_access, login_server, pass_server
+    return hostname_server, port_access, login_server, pass_server
 
 
 # =========================FIREWALL============================
@@ -298,12 +294,12 @@ def scheduler():
 
 my_dir = os.getcwd()
 my_network = '192.168.0.0/16'
-queue_tree_rate_def = 'none'
+queue_tree_rate_def = None
 dir_cfg = my_dir + '\\config\\mikrotik-config.yml'
 dir_key = my_dir + '\\Key\\Key.dll'
 class_treatment = class_treatment()
 
-type_devices = input('Введите тип устройства (router (1) / AP (2) / test(3): ')
+type_devices = input('Введите тип устройства (router (1) / AP (2): ')
 
 if __name__ == '__main__':
 
@@ -320,10 +316,6 @@ if __name__ == '__main__':
 
     with ssh_local_device(hostname=ip_device_clients, username=login_local_device,
                           password=pass_local_device, port=port_access_clients) as ssh:
-
-        # __init__ class
-
-        # ssh_local_device = ssh_local_device()
 
         if type_devices == '1':
             upgrade()
