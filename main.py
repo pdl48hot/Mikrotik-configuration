@@ -1,5 +1,5 @@
 import subprocess
-
+import os
 import pprint
 
 from my_class.ssh_local_device import *
@@ -9,7 +9,7 @@ from my_class.parser_output_ssh import *
 from my_class.class_security import *
 
 
-# ========================INPUT-PARAMETER=======================
+# ========================INPUT-PARAMETER============================
 
 
 def parser(command_terminal):
@@ -246,7 +246,7 @@ def logging():
 
 def identity():
     type_def = "identity"
-    login_name_device = input("Введите логин объекта:")
+    login_name_device = input("name login:")
     command = ssh.exec_cmd('/system identity set name="%s"' % login_name_device)
     error_usl(command, type_def)
 
@@ -277,7 +277,7 @@ def created_ppp_account_too_clients(login_device, password, ip_l2tp):
 
 
 # =========================SYSTEM==================================
-# Требуется upgrade кода
+
 def upgrade():
     # type_def = "upgrade_system"
     command_check = "/system package update check-for-updates"
@@ -314,7 +314,7 @@ dir_cfg = my_dir + '\\config\\mikrotik-config.yml'
 dir_key = my_dir + '\\Key\\Key.dll'
 class_treatment = class_treatment()
 
-type_devices = input('Введите тип устройства (router (1) / AP (2): ')
+type_devices = input('router (1) / AP (2): ')
 
 if __name__ == '__main__':
 
@@ -345,7 +345,7 @@ if __name__ == '__main__':
             service_port()
             password_mac = users(my_network, dir_key)
 
-            queue_tree_rate_def = input("Введите скорость интернета: (*1m/1M): ")
+            queue_tree_rate_def = input("Speed network: (*1m/1M): ")
             queue_tree_rate_def = queue_tree_rate_def.upper()
             queue()
 
